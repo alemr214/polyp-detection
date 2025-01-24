@@ -171,5 +171,5 @@ cython_debug/
 .pypirc
 
 # Datasets
-resources/
-resources/*
+data/
+data/*
