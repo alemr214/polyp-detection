@@ -1,7 +1,7 @@
-ultralytics
-numpy
-torch
-torchvision
-torchaudio
-opencv-python
-matplotlib
+ultralytics==8.3.65
+numpy==1.26.4
+torch==2.5.1
+torchvision==0.20.1
+torchaudio==2.5.1
+opencv-python==4.11.0.86
+matplotlib==3.10.0
