@@ -59,4 +59,4 @@ def copy_images(source_path: str, output_path: str, image_ext: str) -> None:
             output_img_path = os.path.join(output_path, os.path.basename(img_path))
             shutil.copy(img_path, output_img_path)
         except Exception as e:
-            print(f"Error al copiar {img_path}: {e}")
+            print(f"Error to copy {img_path}: {e}")
