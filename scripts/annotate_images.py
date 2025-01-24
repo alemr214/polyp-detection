@@ -24,3 +24,18 @@ def detect_imgs(infolder: str, ext: str = ".png") -> np.ndarray:
         if names.endswith(ext) or names.endswith(ext.upper())
     ]
     return np.sort(flist)
+
+
+# Create directory if no exists
+def create_dir(path: str) -> None:
+    """
+    Create directory if no exists
+
+    Args:
+        path (str): Directory path
+    """
+    try:
+        if not os.path.exists(path):
+            os.makedirs(path)
+    except OSError:
+        print(f"Error: Creating directory. {path}")
