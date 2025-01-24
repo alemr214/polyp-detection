@@ -39,3 +39,17 @@ def create_dir(path: str) -> None:
             os.makedirs(path)
     except OSError:
         print(f"Error: Creating directory. {path}")
+
+
+# Save bounding box in YOLO format
+def save_bbox(txt_path: str, line: str) -> None:
+    """
+    Save bounding box in YOLO format in a txt file with the specified path
+
+    Args:
+        txt_path (str): Path to save the txt file
+        line (str): Parameters of the bounding box in YOLO format
+    """
+    txt_path = txt_path + ".txt"
+    with open(txt_path, "w") as myfile:
+        myfile.write(line + "\n")
