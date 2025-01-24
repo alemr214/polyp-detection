@@ -11,7 +11,6 @@ All code below is written in Python 3.12.8 version, you'll find all libraries re
 Requirements for the software and other tools to build
 
 - [YOLOv11](https://docs.ultralytics.com/models/yolo11/)
-- [Jyputer Notebooks](https://jupyter.org)
 
 #### Libraries
 
@@ -35,6 +34,8 @@ Requirements for the software and other tools to build
 ### Installing
 
 To work with the libraries used in the project, you should run the following:
+
+> Recommendation: create a virtual environment to work, you can follow the guide in the link: [Guide venv](https://docs.python.org/3/library/venv.html)
 
 Upgrade pip before install libraries
 
