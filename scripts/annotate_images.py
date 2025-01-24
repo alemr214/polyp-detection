@@ -75,3 +75,25 @@ def valRect(coord: torch.Tensor) -> list:
     xmax = torch.max(coord[:, 0]) + 1
     ymax = torch.max(coord[:, 1]) + 1
     return [xmin.item(), ymin.item(), xmax.item(), ymax.item()]
+
+
+# Convert bounding box to YOLO format
+def yolo_format(class_index: int, coord: torch.Tensor, width: int, height: int) -> str:
+    """
+    Convert bounding box coordinates to YOLO format using the coordinates calculated from the mask object in the valRect function
+
+    Args:
+        class_index (int): Index of the class
+        coord (np.ndarray): List of coordinates (x, y) of a mask object in a binary mask with shape (n, 1, 2)
+        width (int): With of the all image
+        height (int): Height of the all image
+
+    Returns:
+        str: Returns a string with the bounding box coordinates in YOLO format rounded to 6 decimal places
+    """
+    [xmin, ymin, xmax, ymax] = valRect(coord)
+    x_center = (xmin + xmax) / (2.0 * width)
+    y_center = (ymin + ymax) / (2.0 * height)
+    x_width = (xmax - xmin) / width
+    y_height = (ymax - ymin) / height
+    return f"{class_index} {x_center:.6f} {y_center:.6f} {x_width:.6f} {y_height:.6f}"
