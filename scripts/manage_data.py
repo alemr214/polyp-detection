@@ -1,4 +1,3 @@
-import enum
 import shutil
 import os
 import numpy as np
