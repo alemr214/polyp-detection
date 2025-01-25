@@ -75,3 +75,32 @@ def detect_numbers_in_name(file_name: str) -> int | str:
     """
     name, _ = os.path.splitext(file_name)
     return int(name) if name.isdigit() else name
+
+
+def rename_files(source_path: str, prefix: str, file_ext: str):
+    """
+    Rename files in a directory with a prefix and a number counter
+
+    Args:
+        source_path (str): source path of the files
+        prefix (str): prefix to rename the files
+        file_ext (str): file extension
+
+    Raises:
+        FileNotFoundError: If the source path is not found
+    """
+    if not os.path.isdir(source_path):
+        raise FileNotFoundError(f"Directory {source_path} not found.")
+
+    files = sorted(
+        [f for f in os.listdir(source_path) if f.endswith(file_ext)],
+        key=detect_numbers_in_name,
+    )
+
+    for i, file in enumerate(files, start=1):
+        new_name = f"{prefix}_{i:05d}{file_ext}"
+        current_path = os.path.join(source_path, file)
+        new_path = os.path.join(source_path, new_name)
+
+        os.rename(current_path, new_path)
+        print(f"{file} -> {new_name}")
