@@ -1,6 +1,7 @@
 import shutil
 import os
 import numpy as np
+import random
 
 
 def create_dir(output_path: str) -> None:
@@ -60,3 +61,114 @@ def copy_images(source_path: str, output_path: str, image_ext: str) -> None:
             shutil.copy(img_path, output_img_path)
         except Exception as e:
             print(f"Error to copy {img_path}: {e}")
+
+
+def detect_numbers_in_name(file_name: str) -> int | str:
+    """
+    Detect if a file name is a number and return it to int type else return it to string type
+
+    Args:
+        file_name (str): File name
+
+    Returns:
+        int | str: File name as int or str
+    """
+    name, _ = os.path.splitext(file_name)
+    return int(name) if name.isdigit() else name
+
+
+def rename_files(source_path: str, prefix: str, file_ext: str) -> None:
+    """
+    Rename files in a directory with a prefix and a number counter
+
+    Args:
+        source_path (str): source path of the files
+        prefix (str): prefix to rename the files
+        file_ext (str): file extension
+
+    Raises:
+        FileNotFoundError: If the source path is not found
+    """
+    if not os.path.isdir(source_path):
+        raise FileNotFoundError(f"Directory {source_path} not found.")
+
+    files = sorted(
+        [f for f in os.listdir(source_path) if f.endswith(file_ext)],
+        key=detect_numbers_in_name,
+    )
+
+    for i, file in enumerate(files, start=1):
+        new_name = f"{prefix}_{i:05d}{file_ext}"
+        current_path = os.path.join(source_path, file)
+        new_path = os.path.join(source_path, new_name)
+
+        os.rename(current_path, new_path)
+        print(f"{file} -> {new_name}")
+
+
+def move_files(source_dir: str, dest_dir: str, files: list) -> None:
+    """
+    Move files from source to destination directory.
+
+    Args:
+        source_dir (str): Source directory of files
+        dest_dir (str): Destination directory to move files
+        files (list): List of filenames to move
+    """
+    create_dir(dest_dir)  # Create output directory if not exists
+    for file in files:
+        try:
+            source_file_path = os.path.join(source_dir, file)
+            dest_file_path = os.path.join(dest_dir, file)
+            shutil.move(source_file_path, dest_file_path)
+            print(f"Moved {file} to {dest_dir}")
+        except Exception as e:
+            print(f"Error moving {file}: {e}")
+
+
+def split_data(
+    image_path: str,
+    label_path: str,
+    train_ratio: float = 0.7,
+    seed: int = 42,
+):
+    """
+    Split data into train, validation, and test sets and move them to their respective directories given a train ratio
+
+    Args:
+        image_path (str): image path to split
+        label_path (str): label path to split
+        train_ratio (float, optional): Train ratio to split data. Defaults to 0.7.
+        seed (int, optional): Random number seed. Defaults to 42.
+    """
+    random.seed(seed)
+
+    # Get sorted list of image and label files
+    image_files = sorted(os.listdir(image_path))
+    label_files = sorted(os.listdir(label_path))
+
+    # Combine image and label pairs and shuffle them
+    data = list(zip(image_files, label_files))
+    random.shuffle(data)
+
+    # Split the data into train, validation, and test sets
+    train_end = int(train_ratio * len(data))  # End index for train subset
+    val_end = train_end + int(
+        (1 - train_ratio) / 2 * len(data)
+    )  # End index for val subset
+
+    train_data = data[:train_end]
+    val_data = data[train_end:val_end]
+    test_data = data[val_end:]
+
+    subsets = ["train", "val", "test"]
+    splitted_data = [train_data, val_data, test_data]
+    for subset, split_data in list(zip(subsets, splitted_data)):
+        move_files(
+            image_path, os.path.join(image_path, subset), [img for img, _ in split_data]
+        )
+        move_files(
+            label_path, os.path.join(label_path, subset), [lbl for _, lbl in split_data]
+        )
+
+    print("Data splitted and moved successfully")
