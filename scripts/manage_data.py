@@ -1,3 +1,4 @@
+import enum
 import shutil
 import os
 import numpy as np
@@ -60,3 +61,17 @@ def copy_images(source_path: str, output_path: str, image_ext: str) -> None:
             shutil.copy(img_path, output_img_path)
         except Exception as e:
             print(f"Error to copy {img_path}: {e}")
+
+
+def detect_numbers_in_name(file_name: str) -> int | str:
+    """
+    Detect if a file name is a number and return it to int type else return it to string type
+
+    Args:
+        file_name (str): File name
+
+    Returns:
+        int | str: File name as int or str
+    """
+    name, _ = os.path.splitext(file_name)
+    return int(name) if name.isdigit() else name
