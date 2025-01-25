@@ -4,21 +4,39 @@ YOLOv11 pre-trained model to detect colo-rectal polyps using public datasets.
 
 ## Getting Started
 
-All code below is written in Python 3.12.8 version, you'll find all libraries required in the requirements.txt file, the model pre-trained is the CNN model YOLOv11
+All code below is written in Python 3.12.8 version, you'll find all libraries required in the requirements.txt file, the model pre-trained is the CNN model YOLOv11.
+
+### Folder structure
+
+    .
+    ├── scripts/                        # Automate task with functions
+    │   ├── annotate_images.py          # Annotate images in YOLO format
+    │   └── manage_data.py              # Utils functions as copy, rename, etc
+    ├── .gitignore                      # Ignore files
+    ├── LICENSE                         # Apache 2.0 License
+    ├── README.md                       # README file
+    ├── main.py                         # Main file to run the program
+    └── requirements.txt                # Libraries to use
 
 ### Prerequisites
 
-Requirements for the software and other tools to build
+Requirements for the software and other tools to build.
 
 - [YOLOv11](https://docs.ultralytics.com/models/yolo11/)
 
 #### Libraries
 
-- OpenCV
-- Pytorch
-- Numpy
-- Matplotlib
-- OS
+Found in the [requirements.txt](requirements.txt) file.
+
+| Library             | Version            |
+| ------------  | ------------ |
+| ultralytics      | 8.3.65        |
+| numpy      | 1.26.4       |
+| torch       | 2.5.1       |
+| torchaudio      | 2.5.1         |
+| torchvision       | 0.20.1      |
+| opencv-python  | 4.11.0.86     |
+| matplotlib    | 3.10.0        |
 
 #### Datasets
 
@@ -48,7 +66,7 @@ Install the libraries used on
 ## Authors
 
 - **Alemr214** - *Main Developer* -
-    [Alemr214](https://github.com/alemr214)
+    [alemr214](https://github.com/alemr214)
 
 ## License
 
