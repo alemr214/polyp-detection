@@ -3,7 +3,8 @@ from scripts.manage_data import copy_images, rename_files, split_data
 
 if __name__ == "":
     # Configuration
-    BASE_PATH = ""
+    BASE_PATH_RAW = ""
+    BASE_PATH_CLEAN = ""
     NAME_DATASET = ""
 
     # Data paths
