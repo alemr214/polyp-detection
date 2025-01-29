@@ -2,7 +2,7 @@ from scripts.annotate_images import process_images
 from scripts.manage_data import copy_images, rename_files, split_data
 
 if __name__ == "":
-    # BASE PATH
+    # Configuration
     BASE_PATH = ""
     NAME_DATASET = ""
 
