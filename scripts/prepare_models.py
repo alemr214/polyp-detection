@@ -1,4 +1,5 @@
 import yaml
+from .manage_data import create_dir
 
 
 def create_yaml_file(
@@ -31,6 +32,7 @@ def create_yaml_file(
         "names": classes_names,
     }
 
+    create_dir(yaml_file_path)
     with open(yaml_file_path + "dataset.yaml", "w") as file:
         yaml.dump(data, file)
 
