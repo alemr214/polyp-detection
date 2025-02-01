@@ -192,7 +192,7 @@ def create_yaml_file(
         train_path (str): Relative path to the base folder.
         val_path (str): Relative path to the base folder.
         test_path (str): Relative path to the base folder.
-        number_classes (int): number of classes in the dataset.
+        number_classes (int): Number of classes in the dataset.
         classes_names (list[str]): List with the classes names.
         yaml_file_path (str): Path to save the YAML file.
     """
