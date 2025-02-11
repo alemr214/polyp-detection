@@ -1,58 +1,56 @@
 from scripts.annotate_images import process_images
-from scripts.manage_data import (
-    copy_images,
-    rename_files,
-    split_data,
-)
-from scripts.prepare_models import create_yaml_file
+from scripts.manage_data import copy_images, rename_files, split_data, create_yaml_file
+
 
 if __name__ == "__main__":
-    # Configuration paths to clean the dataset
-    BASE_PATH_RAW = ""
-    BASE_PATH_CLEAN = ""
-    BASE_PATH_YAML = "./configs"
-    NAME_DATASET = ""
+    # Configuration base paths to manage raw and clean information
+    PATH_RAW = "data/raw"
+    PATH_CLEAN = "data/clean"
+    BASE_PATH_YAML = "configs"
+    NAME_DATASET = "sessile_main_kvasir_seg"
 
-    # Data paths
-    IMAGES_FOLDER = f"{BASE_PATH_RAW}/{NAME_DATASET}/images"  # To copy images from
-    IMAGES_EXT = ""  # Image extension
-    MASKS_FOLDER = (
-        f"{BASE_PATH_RAW}/{NAME_DATASET}/masks"  # To process masks from images
-    )
-    MASKS_EXT = ""  # Mask extension
-    OUTPUT_IMAGES_FOLDER = (
-        f"{BASE_PATH_CLEAN}/{NAME_DATASET}/images"  # To save the copy images
-    )
-    OUTPUT_LABELS_FOLDER = f"{BASE_PATH_CLEAN}/{NAME_DATASET}/labels"  # To save the .txt bbox annotations from masks
-    OUTPUT_MASKS_FOLDER = f"{BASE_PATH_CLEAN}/{NAME_DATASET}/masks"
-    CLASS_INDEX = 0  # Class index to save the annotations
-    PREFIX = "image"  # Prefix to rename files ("images")
+    # Designated paths of data to process raw data
+    IMAGES_FOLDER = f"{PATH_RAW}/{NAME_DATASET}/images"
+    MASKS_FOLDER = f"{PATH_RAW}/{NAME_DATASET}/masks"
 
-    copy_images(IMAGES_FOLDER, OUTPUT_IMAGES_FOLDER, IMAGES_EXT)
-    copy_images(MASKS_FOLDER, OUTPUT_MASKS_FOLDER, MASKS_EXT)
+    # Output paths
+    OUTPUT_IMAGES_FOLDER = f"{PATH_CLEAN}/{NAME_DATASET}/images"
+    OUTPUT_LABELS_FOLDER = f"{PATH_CLEAN}/{NAME_DATASET}/labels"
+    OUTPUT_MASKS_FOLDER = f"{PATH_CLEAN}/{NAME_DATASET}/masks"
 
+    # Class index to save the annotations
+    CLASS_INDEX = 0
+
+    # Prefix to rename files ("images")
+    PREFIX = "image"
+
+    # Copy images and masks to the output folder
+    copy_images(IMAGES_FOLDER, OUTPUT_IMAGES_FOLDER)
+    copy_images(MASKS_FOLDER, OUTPUT_MASKS_FOLDER)
+
+    # Process images and masks to create labels
     process_images(
         OUTPUT_IMAGES_FOLDER,
-        IMAGES_EXT,
         MASKS_FOLDER,
-        MASKS_EXT,
         OUTPUT_LABELS_FOLDER,
         CLASS_INDEX,
     )
 
-    rename_files(OUTPUT_IMAGES_FOLDER, PREFIX, IMAGES_EXT)
-    rename_files(OUTPUT_LABELS_FOLDER, PREFIX, "")  # .txt for labels
-    rename_files(OUTPUT_MASKS_FOLDER, PREFIX, MASKS_EXT)
+    # Rename images, masks, and labels
+    rename_files(OUTPUT_IMAGES_FOLDER, PREFIX)
+    rename_files(OUTPUT_LABELS_FOLDER, PREFIX)
+    rename_files(OUTPUT_MASKS_FOLDER, PREFIX)
 
+    # Split data into train, validation, and test
     split_data(OUTPUT_IMAGES_FOLDER, OUTPUT_LABELS_FOLDER)
 
-    # Create the YAML file
+    # Create YAML file with the dataset information
     create_yaml_file(
-        BASE_PATH_CLEAN,
-        f"{NAME_DATASET}/images/train",
-        f"{NAME_DATASET}/images/val",
-        f"{NAME_DATASET}/images/test",
-        CLASS_INDEX,
-        [""],
-        BASE_PATH_YAML,
+        f"{PATH_CLEAN}/{NAME_DATASET}",
+        "images/train",
+        "images/val",
+        "images/test",
+        1,
+        ["polyp"],
+        f"{BASE_PATH_YAML}/{NAME_DATASET}/",
     )
