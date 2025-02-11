@@ -3,21 +3,23 @@ import torch
 from torchvision.io import read_image, ImageReadMode
 from .manage_data import create_dir, detect_imgs
 
+
+# Set device to MPS if available for better performance in a macbook with M1 chip
 device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 
 
 # Save bounding box in YOLO format
-def save_bbox(txt_path: str, line: str) -> None:
+def save_bbox(txt_path: str, line_to_write: str) -> None:
     """
     Save bounding box in YOLO format in a txt file with the specified path
 
     Args:
         txt_path (str): Path to save the txt file
-        line (str): Parameters of the bounding box in YOLO format
+        line_to_write (str): Parameters of the bounding box in YOLO format to write in a file
     """
     txt_path = txt_path + ".txt"
     with open(txt_path, "w") as myfile:
-        myfile.write(line + "\n")
+        myfile.write(line_to_write + "\n")
 
 
 # Calculate bounding box coordinates
@@ -34,6 +36,7 @@ def valRect(coord: torch.Tensor) -> list:
     Returns:
         list: Returns a list with the coordinates of the bounding box [xmin, ymin, xmax, ymax]
     """
+    # Coordinates of the bounding box in the format [xmin, ymin, xmax, ymax] with index 1
     xmin = torch.min(coord[:, 0]) + 1
     ymin = torch.min(coord[:, 1]) + 1
     xmax = torch.max(coord[:, 0]) + 1
@@ -66,9 +69,7 @@ def yolo_format(class_index: int, coord: torch.Tensor, width: int, height: int) 
 # Main function to call and process images
 def process_images(
     image_folder: str,
-    image_ext: str,
     mask_folder: str,
-    mask_ext: str,
     output_folder: str,
     class_index: int = 0,  # Only allows one class
 ) -> None:
@@ -83,22 +84,20 @@ def process_images(
     """
     create_dir(output_folder)  # Create output directory
 
-    images = detect_imgs(image_folder, image_ext)  # Detect images in the folder
-    masks = detect_imgs(mask_folder, mask_ext)  # Detect masks in the folder
+    images = detect_imgs(image_folder)
+    masks = detect_imgs(mask_folder)
 
-    for img_path, mask_path in zip(
-        images, masks
-    ):  # Iterates and uncompress every path of images and masks
-        image = read_image(img_path).to(device)  # Read image
-        mask = read_image(mask_path, mode=ImageReadMode.GRAY).to(
-            device
-        )  # Read mask in grayscale
+    # Iterates and uncompress every path of images and masks
+    for img_path, mask_path in zip(images, masks):
+        image = read_image(img_path).to(device)
+
+        # Read mask in grayscale
+        mask = read_image(mask_path, mode=ImageReadMode.GRAY).to(device)
 
         h, w = image.shape[1], image.shape[2]  # Get image shape
 
-        mask_coordinates = torch.nonzero(mask.squeeze(), as_tuple=False)[
-            :, [1, 0]
-        ]  # Find non-zero coordinates in the mask and reverse the order
+        # Find non-zero coordinates in the mask and reverse the order
+        mask_coordinates = torch.nonzero(mask.squeeze(), as_tuple=False)[:, [1, 0]]
 
         # If no objects found in the mask, skip the image
         if mask_coordinates.size(0) == 0:
