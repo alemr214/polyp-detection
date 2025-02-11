@@ -66,6 +66,19 @@ def yolo_format(class_index: int, coord: torch.Tensor, width: int, height: int) 
     return f"{class_index} {x_center:.6f} {y_center:.6f} {x_width:.6f} {y_height:.6f}"
 
 
+def get_mask_coordinates(mask: torch.Tensor) -> torch.Tensor:
+    """
+    Get the coordinates of the mask object obtaining the non-zero coordinates and reversing the order
+
+    Args:
+        mask (torch.Tensor): Binary mask with shape (1, H, W)
+
+    Returns:
+        torch.Tensor: Returns the coordinates of the mask object in the format (n, 2)
+    """
+    return torch.nonzero(mask.squeeze(), as_tuple=False)[:, [1, 0]]
+
+
 # Main function to call and process images
 def process_images(
     image_folder: str,
@@ -90,14 +103,14 @@ def process_images(
     # Iterates and uncompress every path of images and masks
     for img_path, mask_path in zip(images, masks):
         image = read_image(img_path).to(device)
-
         # Read mask in grayscale
         mask = read_image(mask_path, mode=ImageReadMode.GRAY).to(device)
 
-        h, w = image.shape[1], image.shape[2]  # Get image shape
+        # Get image shape
+        h, w = image.shape[1], image.shape[2]
 
         # Find non-zero coordinates in the mask and reverse the order
-        mask_coordinates = torch.nonzero(mask.squeeze(), as_tuple=False)[:, [1, 0]]
+        mask_coordinates = get_mask_coordinates(mask)
 
         # If no objects found in the mask, skip the image
         if mask_coordinates.size(0) == 0:
