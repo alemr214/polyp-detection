@@ -133,6 +133,15 @@ def annotate_images(
 def draw_bounding_boxes_on_images(
     images_path: str, masks_path: str, output_path: str, color: str = "blue"
 ) -> None:
+    """
+    Draw bounding boxes on images using the coordinates obtained from the mask object
+
+    Args:
+        images_path (str): Path of images
+        masks_path (str): Path of masks
+        output_path (str): Path to save the images with bounding boxes drawn
+        color (str, optional): Color of the box drawn. Defaults to "blue".
+    """
     create_dir(output_path)
 
     images = detect_imgs(images_path)
