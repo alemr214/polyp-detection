@@ -1,4 +1,4 @@
-from scripts.annotate_images import process_images
+from scripts.process_images import annotate_images
 from scripts.manage_data import copy_images, rename_files, split_data, create_yaml_file
 
 
@@ -29,7 +29,7 @@ if __name__ == "__main__":
     copy_images(MASKS_FOLDER, OUTPUT_MASKS_FOLDER)
 
     # Process images and masks to create labels
-    process_images(
+    annotate_images(
         OUTPUT_IMAGES_FOLDER,
         MASKS_FOLDER,
         OUTPUT_LABELS_FOLDER,
