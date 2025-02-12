@@ -1,8 +1,9 @@
 import os
 import torch
 from torchvision.io import read_image, ImageReadMode
+from torchvision.utils import draw_bounding_boxes
+from torchvision.transforms.functional import to_pil_image
 from .manage_data import create_dir, detect_imgs
-
 
 # Set device to MPS if available for better performance in a macbook with M1 chip
 device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
@@ -127,3 +128,36 @@ def annotate_images(
         save_bbox(output_txt_path, yolo_line)
 
         print(f"Processed: {img_path} -> {output_txt_path}")
+
+
+def draw_bounding_boxes_on_images(
+    images_path: str, masks_path: str, output_path: str, color: str = "blue"
+) -> None:
+    create_dir(output_path)
+
+    images = detect_imgs(images_path)
+    masks = detect_imgs(masks_path)
+
+    for img_path, mask_path in zip(images, masks):
+        image = read_image(img_path).to(torch.uint8).to(device)
+        mask = read_image(mask_path, mode=ImageReadMode.GRAY).to(device)
+
+        name_image, ext_image = os.path.splitext(os.path.basename(img_path))
+
+        mask_positives_pixels = get_mask_coordinates(mask)
+
+        [xmin, ymin, xmax, ymax] = valRect(mask_positives_pixels)
+
+        bbox_coordinates = torch.tensor(
+            [[xmin, ymin, xmax, ymax]], dtype=torch.int, device=device
+        )
+
+        image_with_boxes = draw_bounding_boxes(
+            image, bbox_coordinates, width=3, colors=[color]
+        )
+
+        image_with_boxes_pil = to_pil_image(image_with_boxes)
+
+        image_with_boxes_pil.save(
+            os.path.join(output_path, f"{name_image}_bbox{ext_image}")
+        )
