@@ -5,8 +5,14 @@ from torchvision.utils import draw_bounding_boxes
 from torchvision.transforms.functional import to_pil_image
 from .manage_data import create_dir, detect_imgs
 
-# Set device to MPS if available for better performance in a macbook with M1 chip
-device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
+# Set device to CUDA if available or MPS for better performance in a macbook with M1 chip or CPU
+device = (
+    "cuda"
+    if torch.cuda.is_available()
+    else "mps"
+    if torch.backends.mps.is_available()
+    else "cpu"
+)
 
 
 # Save bounding box in YOLO format
