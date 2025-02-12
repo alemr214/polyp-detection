@@ -1,4 +1,4 @@
-from scripts.process_images import annotate_images
+from scripts.process_images import annotate_images, draw_bounding_boxes_on_images
 from scripts.manage_data import copy_images, rename_files, split_data, create_yaml_file
 
 
@@ -17,6 +17,7 @@ if __name__ == "__main__":
     OUTPUT_IMAGES_FOLDER = f"{PATH_CLEAN}/{NAME_DATASET}/images"
     OUTPUT_LABELS_FOLDER = f"{PATH_CLEAN}/{NAME_DATASET}/labels"
     OUTPUT_MASKS_FOLDER = f"{PATH_CLEAN}/{NAME_DATASET}/masks"
+    OUTPUT_BBOX_FOLDER = f"{PATH_CLEAN}/{NAME_DATASET}/bbox"
 
     # Class index to save the annotations
     CLASS_INDEX = 0
@@ -41,6 +42,10 @@ if __name__ == "__main__":
     rename_files(OUTPUT_LABELS_FOLDER, PREFIX)
     rename_files(OUTPUT_MASKS_FOLDER, PREFIX)
 
+    # Draw bounding boxes on images
+    draw_bounding_boxes_on_images(
+        OUTPUT_IMAGES_FOLDER, OUTPUT_MASKS_FOLDER, OUTPUT_BBOX_FOLDER
+    )
     # Split data into train, validation, and test
     split_data(OUTPUT_IMAGES_FOLDER, OUTPUT_LABELS_FOLDER)
 
