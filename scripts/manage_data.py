@@ -5,6 +5,7 @@ import shutil
 import numpy as np
 
 
+# Create directory in a output path
 def create_dir(output_path: str) -> None:
     """
     Create directory if no exists
@@ -20,28 +21,30 @@ def create_dir(output_path: str) -> None:
 
 
 # Detect images in a folder an return a sorted list of images path
-def detect_imgs(source_path: str, image_ext: str = ".png") -> np.ndarray:
+def detect_imgs(
+    source_path: str, image_ext: list[str] | str = [".png", ".jpg", ".tif"]
+) -> np.ndarray:
     """
-    Returns a sorted list of images path with some extension (.png as default) in a directory path
+    Returns a sorted list of images path with some extension (defaults: .png, .jpg, .tif) in a directory path
 
     Args:
         source_path (str): Images path
-        image_ext (str, optional): Extension of images. Defaults to ".png".
+        image_ext (list[str] | str, optional): Extension fo images. Defaults to [".png", ".jpg", ".tif"].
 
     Returns:
         np.ndarray: Sorted list of image paths
     """
     items = os.listdir(source_path)
     flist = [
-        os.path.join(source_path, names)
-        for names in items
-        if names.endswith(image_ext) or names.endswith(image_ext.upper())
+        os.path.join(source_path, item_name)
+        for item_name in items
+        if any(item_name.endswith(ext.lower()) for ext in image_ext)
     ]
     return np.sort(flist)
 
 
 # Copy images from the source path to the output path to save us a backup in case of corruption
-def copy_images(source_path: str, output_path: str, image_ext: str) -> None:
+def copy_images(source_path: str, output_path: str) -> None:
     """
     Copy images from the source path to the output path
 
@@ -50,10 +53,10 @@ def copy_images(source_path: str, output_path: str, image_ext: str) -> None:
         output_path (str): output path to save the images
         image_ext (str): image extension
     """
-    create_dir(output_path)  # Create output directory if not exists
+    create_dir(output_path)
 
     # Get list of image paths using the detect_imgs function
-    images = detect_imgs(source_path, image_ext)
+    images = detect_imgs(source_path)
 
     # Copy each image to the output path
     for img_path in images:
@@ -78,14 +81,13 @@ def detect_numbers_in_name(file_name: str) -> int | str:
     return int(name) if name.isdigit() else name
 
 
-def rename_files(source_path: str, prefix: str, file_ext: str) -> None:
+def rename_files(source_path: str, prefix: str) -> None:
     """
     Rename files in a directory with a prefix and a number counter
 
     Args:
         source_path (str): source path of the files
         prefix (str): prefix to rename the files
-        file_ext (str): file extension
 
     Raises:
         FileNotFoundError: If the source path is not found
@@ -94,12 +96,13 @@ def rename_files(source_path: str, prefix: str, file_ext: str) -> None:
         raise FileNotFoundError(f"Directory {source_path} not found.")
 
     files = sorted(
-        [f for f in os.listdir(source_path) if f.endswith(file_ext)],
+        [file for file in os.listdir(source_path)],
         key=detect_numbers_in_name,
     )
 
     for i, file in enumerate(files, start=1):
-        new_name = f"{prefix}_{i:05d}{file_ext}"
+        _, ext = os.path.splitext(file)
+        new_name = f"{prefix}_{i:05d}{ext}"
         current_path = os.path.join(source_path, file)
         new_path = os.path.join(source_path, new_name)
 
@@ -116,7 +119,8 @@ def move_files(source_dir: str, dest_dir: str, files: list) -> None:
         dest_dir (str): Destination directory to move files
         files (list): List of filenames to move
     """
-    create_dir(dest_dir)  # Create output directory if not exists
+    create_dir(dest_dir)
+
     for file in files:
         try:
             source_file_path = os.path.join(source_dir, file)

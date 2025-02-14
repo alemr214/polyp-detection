@@ -171,8 +171,8 @@ cython_debug/
 .pypirc
 
 # Datasets
-data/
-data/*
+data/raw/
+data/raw/*
 
 # Macos directory metadata
 .DS_Store
