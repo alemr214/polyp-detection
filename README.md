@@ -9,14 +9,33 @@ All code below is written in Python 3.12.8 version, you'll find all libraries re
 ### Folder structure
 
     .
-    ├── scripts/                        # Automate task with functions
-    │   ├── annotate_images.py          # Annotate images in YOLO format
-    │   └── manage_data.py              # Utils functions as copy, rename, etc
-    ├── .gitignore                      # Ignore files
-    ├── LICENSE                         # Apache 2.0 License
-    ├── README.md                       # README file
-    ├── main.py                         # Main file to run the program
-    └── requirements.txt                # Libraries to use
+    ├── data/                                           # Base path to all datasets
+    │   └── clean/                                      # Clean path for cleaned data
+    │       ├── cvc_clinic_db/                          # Name of datasets
+    │       │   ├── bbox                                # Images with its bounding boxes drawn with the binary mask image
+    │       │   ├── images/                             # Path for images and split in YOLO format
+    │       │   │   ├── test/                           
+    │       │   │   ├── train/
+    │       │   │   └── val/
+    │       │   ├── labels                              # Path for labels and split in YOLO format
+    │       │   └── masks                               # Binary masks
+    │       ├── cvc_colon_db/
+    │       │   └── ...
+    │       ├── etis_laribpolypdb/
+    │       │   └── ...
+    │       ├── kvasir_seg/
+    │       │   └── ...
+    │       ├── sessile_main_kvasir_seg/
+    │       │   └── ...
+    │       └── predict_images/                         # Images for predict feature functions
+    ├── scripts/
+    │   ├── manage_data.py                              # Script for manage images and utilities
+    │   └── process_images.py                           # Process images and annotate functions
+    ├── data_preparation.py                             # Base script to prepare images and other files
+    ├── train_model.py                                  # Ultralytics functions to use and train YOLO model
+    ├── README.md                                       
+    ├── LICENSE
+    └── requirements.txt
 
 ### Prerequisites
 
@@ -27,16 +46,6 @@ Requirements for the software and other tools to build.
 #### Libraries
 
 Found in the [requirements.txt](requirements.txt) file.
-
-| Library             | Version            |
-| ------------  | ------------ |
-| ultralytics      | 8.3.65        |
-| numpy      | 1.26.4       |
-| torch       | 2.5.1       |
-| torchaudio      | 2.5.1         |
-| torchvision       | 0.20.1      |
-| opencv-python  | 4.11.0.86     |
-| matplotlib    | 3.10.0        |
 
 #### Datasets
 
