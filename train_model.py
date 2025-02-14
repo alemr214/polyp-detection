@@ -23,10 +23,10 @@ if __name__ == "__main__":
     # Train model
     results = model.train(
         data=f"{BASE_PATH_YAML}/{NAME_DATASET}/dataset.yaml",
-        epochs=10,
+        epochs=500,
         imgsz=640,
         batch=-1,
-        save_period=5,  # Save model every 10 epochs
+        save_period=50,  # Save model every 10 epochs
         cache=True,  # Cache images for faster training
         device=device,
         name=NAME_DATASET,
