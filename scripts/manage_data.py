@@ -110,6 +110,19 @@ def rename_files(source_path: str, prefix: str) -> None:
         print(f"{file} -> {new_name}")
 
 
+def count_images(source_path: str) -> int:
+    """
+    Count the number of images in a directory
+
+    Args:
+        source_path (str): Source path of the images
+
+    Returns:
+        int: Number of images
+    """
+    return len(detect_imgs(source_path))
+
+
 def move_files(source_dir: str, dest_dir: str, files: list) -> None:
     """
     Move files from source to destination directory.
