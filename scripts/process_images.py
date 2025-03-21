@@ -16,7 +16,7 @@ def save_bbox(txt_path: str, line_to_write: str) -> None:
         my_file.write(line_to_write + "\n")
 
 
-def detect_object(mask: str) -> list | None:
+def detect_object(mask: str, min_area: int = 20) -> list | None:
     """
     Detect objects in a binary mask and return the coordinates for every object detected in a list of tuples.
 
@@ -30,6 +30,9 @@ def detect_object(mask: str) -> list | None:
     num_labels, _, stats, _ = cv2.connectedComponentsWithStats(mask_image)
     objects_coordiantes = []
     for i in range(1, num_labels):
+        area = stats[i][cv2.CC_STAT_AREA]
+        if area < min_area:
+            continue
         x, y, w, h = (
             stats[i][cv2.CC_STAT_LEFT],
             stats[i][cv2.CC_STAT_TOP],
@@ -139,7 +142,7 @@ def draw_bounding_boxes_on_images(
         object_coordinates = detect_object(mask_path)
         for coord in object_coordinates:
             x1, y1, x2, y2 = coord
-            cv2.rectangle(image, (x1, y1), (x2, y2), (255, 0, 0), 4)
+            cv2.rectangle(image, (x1, y1), (x2, y2), (255, 0, 0), 3)
             base_name = os.path.splitext(os.path.basename(image_path))[0]
             ext_type = os.path.splitext(os.path.basename(image_path))[1]
             output_image_path = os.path.join(output_bbox_images, base_name)
