@@ -179,4 +179,4 @@ data/raw/*
 
 # Config directory for yaml files
 configs/*
-clean/*
+data/clean/*
