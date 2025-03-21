@@ -16,7 +16,7 @@ def save_bbox(txt_path: str, line_to_write: str) -> None:
         my_file.write(line_to_write + "\n")
 
 
-def detect_object(mask: str, min_area: int = 20) -> list | None:
+def detect_object(mask: str, min_area: int = 35) -> list | None:
     """
     Detect objects in a binary mask and return the coordinates for every object detected in a list of tuples.
 
