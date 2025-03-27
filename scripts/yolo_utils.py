@@ -70,7 +70,12 @@ def get_best_model(
     return model
 
 
-def validate_model(model_path: str) -> list:
+def validate_model(
+    model_path: str,
+    yaml_path: str,
+    name: str,
+    project: str,
+) -> list:
     """
     Generate metrics using the best model generated during the training.
 
@@ -81,13 +86,7 @@ def validate_model(model_path: str) -> list:
         list: List with the metrics of the best_model.
     """
     best_model = get_best_model(model_path)
-    metrics = best_model.val()
-    return [
-        metrics.box.map,
-        metrics.box.map50,
-        metrics.box.map75,
-        metrics.box.maps,
-    ]
+    best_model.val(data=yaml_path, name=name, project=project, device=get_device())
 
 
 # REFACTOR: CHECK THE PARAMETERS IN THE EXPORT METHOD TO SEE IF IT IS POSSIBLE TO EXPORT TO OTHER FORMATS AND WHAT IS NEEDED
@@ -104,4 +103,21 @@ def export_model(model_path: str, format: str) -> None:
         format=format,
         opset=12,
         device=get_device(),
+    )
+
+
+def make_predicts(
+    model_path: str,
+    test_images_path: str,
+    name: str,
+    project: str,
+) -> None:
+    best_model = get_best_model(model_path)
+    best_model.predict(
+        test_images_path,
+        save=True,
+        name=name,
+        project=project,
+        device=get_device(),
+        save_txt=True,
     )
