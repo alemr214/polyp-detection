@@ -171,11 +171,15 @@ cython_debug/
 .pypirc
 
 # Datasets
-data/raw/
+data/
 data/raw/*
+data/clean/*
 
 # Macos directory metadata
 .DS_Store
 
 # Config directory for yaml files
 configs/*
+
+# Model directory for model files
+runs/*

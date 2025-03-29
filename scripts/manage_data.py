@@ -2,7 +2,6 @@ import os
 import random
 import yaml
 import shutil
-import numpy as np
 
 
 # Create directory in a output path
@@ -20,51 +19,44 @@ def create_dir(output_path: str) -> None:
         print(f"Error: Creating directory. {output_path}")
 
 
-# Detect images in a folder an return a sorted list of images path
-def detect_imgs(
-    source_path: str, image_ext: list[str] | str = [".png", ".jpg", ".tif"]
-) -> np.ndarray:
+# Detect files in a folder an return a sorted list of files path
+def detect_files(source_path: str, files_ext: list[str]) -> list:
     """
-    Returns a sorted list of images path with some extension (defaults: .png, .jpg, .tif) in a directory path
+    Returns a sorted list of files path with some extension in a directory path
 
     Args:
         source_path (str): Images path
-        image_ext (list[str] | str, optional): Extension fo images. Defaults to [".png", ".jpg", ".tif"].
+        files_ext (list[str]): Extension fo images.
 
     Returns:
-        np.ndarray: Sorted list of image paths
+        list: Sorted list of files path
     """
     items = os.listdir(source_path)
     flist = [
         os.path.join(source_path, item_name)
         for item_name in items
-        if any(item_name.endswith(ext.lower()) for ext in image_ext)
+        if any(item_name.endswith(ext.lower()) for ext in files_ext)
     ]
-    return np.sort(flist)
+    return sorted(flist)
 
 
-# Copy images from the source path to the output path to save us a backup in case of corruption
-def copy_images(source_path: str, output_path: str) -> None:
+def count_lines_in_file(source_labels: str) -> int:
     """
-    Copy images from the source path to the output path
+    Count lines in a file
 
     Args:
-        source_path (str): source path of the images
-        output_path (str): output path to save the images
-        image_ext (str): image extension
+        source_labels (str): Path to the labels directory
+
+    Returns:
+        int: Number of lines per file in a directory of labels
     """
-    create_dir(output_path)
-
-    # Get list of image paths using the detect_imgs function
-    images = detect_imgs(source_path)
-
-    # Copy each image to the output path
-    for img_path in images:
-        try:
-            output_img_path = os.path.join(output_path, os.path.basename(img_path))
-            shutil.copy(img_path, output_img_path)
-        except Exception as e:
-            print(f"Error to copy {img_path}: {e}")
+    labels = detect_files(source_labels, [".txt"])
+    total_lines = 0
+    for label in labels:
+        with open(label, "r", encoding="utf-8") as archivo:
+            lines = sum(1 for _ in archivo)
+        total_lines += lines
+    return total_lines
 
 
 def detect_numbers_in_name(file_name: str) -> int | str:
@@ -79,6 +71,29 @@ def detect_numbers_in_name(file_name: str) -> int | str:
     """
     name, _ = os.path.splitext(file_name)
     return int(name) if name.isdigit() else name
+
+
+# Copy images from the source path to the output path to save us a backup in case of corruption
+def copy_images(source_path: str, output_path: str) -> None:
+    """
+    Copy images from the source path to the output path
+
+    Args:
+        source_path (str): source path of the images
+        output_path (str): output path to save the images
+    """
+    create_dir(output_path)
+
+    # Get list of image paths using the detect_files function
+    images = detect_files(source_path, [".png", ".jpg", ".tif"])
+
+    # Copy each image to the output path
+    for img_path in images:
+        try:
+            output_img_path = os.path.join(output_path, os.path.basename(img_path))
+            shutil.copy(img_path, output_img_path)
+        except Exception as e:
+            print(f"Error to copy {img_path}: {e}")
 
 
 def rename_files(source_path: str, prefix: str) -> None:
@@ -107,7 +122,20 @@ def rename_files(source_path: str, prefix: str) -> None:
         new_path = os.path.join(source_path, new_name)
 
         os.rename(current_path, new_path)
-        print(f"{file} -> {new_name}")
+
+
+def count_files(source_path: str, file_ext: list[str]) -> int:
+    """
+    Count the number of files in a directory
+
+    Args:
+        source_path (str): Source path of the images
+        file_ext (list[str]): List of image extensions
+
+    Returns:
+        int: Number of files in a directory
+    """
+    return len(detect_files(source_path, file_ext))
 
 
 def move_files(source_dir: str, dest_dir: str, files: list) -> None:
@@ -126,7 +154,6 @@ def move_files(source_dir: str, dest_dir: str, files: list) -> None:
             source_file_path = os.path.join(source_dir, file)
             dest_file_path = os.path.join(dest_dir, file)
             shutil.move(source_file_path, dest_file_path)
-            print(f"Moved {file} to {dest_dir}")
         except Exception as e:
             print(f"Error moving {file}: {e}")
 
