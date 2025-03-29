@@ -23,15 +23,15 @@ BASE_PATH = os.getcwd()
 PATH_RAW = "data/raw"
 PATH_CLEAN = "data/clean"
 BASE_PATH_YAML = "configs"
-NAME_DATASET = "polypgen"
+NAME_DATASET = "cvc_clinic_db"
 BASE_PATH_MODEL = "runs"
 TRAIN_PATH = "train"
 PREDICT_PATH = "predict"
 VALIDATE_PATH = "validate"
 
 # Designated paths of data to process raw data
-IMAGES_FOLDER = f"{PATH_RAW}/{NAME_DATASET}/images"
-MASKS_FOLDER = f"{PATH_RAW}/{NAME_DATASET}/masks"
+IMAGES_FOLDER = f"{PATH_RAW}/{NAME_DATASET}/PNG/Original"
+MASKS_FOLDER = f"{PATH_RAW}/{NAME_DATASET}/PNG/Ground Truth"
 
 # Output paths
 OUTPUT_IMAGES_FOLDER = f"{PATH_CLEAN}/{NAME_DATASET}/images"
@@ -87,9 +87,11 @@ create_yaml_file(
     f"{BASE_PATH_YAML}/{NAME_DATASET}/",
 )
 
+
+# %%
+# Counters
 total_images = 0
 total_polyps = 0
-# %%
 # Count images in each folder
 for folder in ["train", "validation", "test_single", "test_sequence"]:
     print(
