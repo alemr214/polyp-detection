@@ -59,7 +59,7 @@ def load_boxes_from_file(file_path):
                 box = yolo_to_box(coords)
                 boxes.append(box)
             except Exception as e:
-                print(f"Error procesando la línea: {line} en {file_path}")
+                print(f"Error {e} procesando la línea: {line} en {file_path}")
     return boxes
 
 
