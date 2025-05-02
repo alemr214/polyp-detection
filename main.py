@@ -45,47 +45,47 @@ CLASS_INDEX = 0
 # Prefix to rename files ("images")
 PREFIX_IMAGE = "image"
 
-# %%
-# Copy images and masks to the output folder
-copy_images(IMAGES_FOLDER, OUTPUT_IMAGES_FOLDER)
-copy_images(MASKS_FOLDER, OUTPUT_MASKS_FOLDER)
+# # %%
+# # Copy images and masks to the output folder
+# copy_images(IMAGES_FOLDER, OUTPUT_IMAGES_FOLDER)
+# copy_images(MASKS_FOLDER, OUTPUT_MASKS_FOLDER)
 
-# %%
-# Process images and masks to create labels
-annotate_images(
-    OUTPUT_IMAGES_FOLDER,
-    OUTPUT_MASKS_FOLDER,
-    OUTPUT_LABELS_FOLDER,
-    CLASS_INDEX,
-)
+# # %%
+# # Process images and masks to create labels
+# annotate_images(
+#     OUTPUT_IMAGES_FOLDER,
+#     OUTPUT_MASKS_FOLDER,
+#     OUTPUT_LABELS_FOLDER,
+#     CLASS_INDEX,
+# )
 
-# %%
-# Rename images, masks, and labels
-rename_files(OUTPUT_IMAGES_FOLDER, PREFIX_IMAGE)
-rename_files(OUTPUT_LABELS_FOLDER, PREFIX_IMAGE)
-rename_files(OUTPUT_MASKS_FOLDER, PREFIX_IMAGE)
+# # %%
+# # Rename images, masks, and labels
+# rename_files(OUTPUT_IMAGES_FOLDER, PREFIX_IMAGE)
+# rename_files(OUTPUT_LABELS_FOLDER, PREFIX_IMAGE)
+# rename_files(OUTPUT_MASKS_FOLDER, PREFIX_IMAGE)
 
-# %%
-# Draw bounding boxes on images
-draw_bounding_boxes_on_images(
-    OUTPUT_IMAGES_FOLDER, OUTPUT_MASKS_FOLDER, OUTPUT_BBOX_FOLDER
-)
+# # %%
+# # Draw bounding boxes on images
+# draw_bounding_boxes_on_images(
+#     OUTPUT_IMAGES_FOLDER, OUTPUT_MASKS_FOLDER, OUTPUT_BBOX_FOLDER
+# )
 
-# %%
-# Split data into train, validation, and test
-split_data(OUTPUT_IMAGES_FOLDER, OUTPUT_LABELS_FOLDER)
+# # %%
+# # Split data into train, validation, and test
+# split_data(OUTPUT_IMAGES_FOLDER, OUTPUT_LABELS_FOLDER)
 
-# %%
-# Create YAML file with the dataset information
-create_yaml_file(
-    f"{BASE_PATH}/{PATH_CLEAN}/{NAME_DATASET}",
-    "images/train",
-    "images/validation",
-    "images/test_single",
-    1,
-    ["polyp"],
-    f"{BASE_PATH_YAML}/{NAME_DATASET}/",
-)
+# # %%
+# # Create YAML file with the dataset information
+# create_yaml_file(
+#     f"{BASE_PATH}/{PATH_CLEAN}/{NAME_DATASET}",
+#     "images/train",
+#     "images/validation",
+#     "images/test_single",
+#     1,
+#     ["polyp"],
+#     f"{BASE_PATH_YAML}/{NAME_DATASET}/",
+# )
 
 
 # %%
@@ -106,18 +106,18 @@ for folder in ["train", "validation", "test_single", "test_sequence"]:
 print(f"Total images: {total_images}")
 print(f"Total polyps: {total_polyps}")
 
-# %%
-# Train model
-train_model(
-    f"{BASE_PATH_MODEL}/{TRAIN_PATH}/{NAME_DATASET}/yolo11n.pt",
-    f"{BASE_PATH_YAML}/{NAME_DATASET}/dataset.yaml",
-    epoches=5,
-    image_size=640,
-    batch_size=-1,
-    save_period=1,
-    name=NAME_DATASET,
-    project=f"{BASE_PATH_MODEL}/{TRAIN_PATH}",
-)
+# # %%
+# # Train model
+# train_model(
+#     f"{BASE_PATH_MODEL}/{TRAIN_PATH}/{NAME_DATASET}/yolo11n.pt",
+#     f"{BASE_PATH_YAML}/{NAME_DATASET}/dataset.yaml",
+#     epoches=5,
+#     image_size=640,
+#     batch_size=-1,
+#     save_period=1,
+#     name=NAME_DATASET,
+#     project=f"{BASE_PATH_MODEL}/{TRAIN_PATH}",
+# )
 
 # %%
 # Predict model
@@ -126,6 +126,7 @@ for dataset in [
     "cvc_colon_db",
     "etis_laribpolypdb",
     "kvasir_seg",
+    "sessile_main_kvasir_seg",
 ]:
     make_predicts(
         f"{BASE_PATH_MODEL}/{TRAIN_PATH}/{dataset}",
@@ -135,11 +136,11 @@ for dataset in [
     )
 
 
-# %%
-# Validate model
-results = validate_model(
-    f"{BASE_PATH_MODEL}/{TRAIN_PATH}/{NAME_DATASET}",
-    f"{BASE_PATH_YAML}/{NAME_DATASET}/dataset.yaml",
-    name=NAME_DATASET,
-    project=f"{BASE_PATH_MODEL}/{VALIDATE_PATH}",
-)
+# # %%
+# # Validate model
+# results = validate_model(
+#     f"{BASE_PATH_MODEL}/{TRAIN_PATH}/{NAME_DATASET}",
+#     f"{BASE_PATH_YAML}/{NAME_DATASET}/dataset.yaml",
+#     name=NAME_DATASET,
+#     project=f"{BASE_PATH_MODEL}/{VALIDATE_PATH}",
+# )
