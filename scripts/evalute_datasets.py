@@ -55,12 +55,10 @@ def get_boxes_from_file(source_path: str) -> list:
         for line in f:
             line = line.strip()
             parts = line.split()
-            try:
+            if len(parts) == 5:
                 coords = list(map(float, parts[1:5]))
                 box = xywh2xyxy(torch.tensor(coords))
                 boxes.append(box)
-            except Exception as e:
-                print(f"Error processing line '{line}' in file '{f}': {e}")
     return boxes
 
 
