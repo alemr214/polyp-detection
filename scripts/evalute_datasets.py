@@ -1,146 +1,121 @@
-# Importa la función xywh2xyxy para convertir cajas de (x_center, y_center, width, height) a (x1, y1, x2, y2)
+from .manage_data import detect_files
 from ultralytics.utils.ops import xywh2xyxy
-from scripts.manage_data import count_lines_in_file, detect_files
 import torch
+import numpy as np
 import os
-import glob
 
 
-def calculate_iou(box1, box2):
+def calculate_iou(box_gt: np.ndarray, box_pred: np.ndarray) -> float:
     """
-    Calcula el Intersection over Union (IoU) entre dos cajas en formato (x1, y1, x2, y2).
+    Calculate the Intersection over Union (IoU) between two bounding boxes, the ground truth and the predicted box for these case, ensurence that the boxes are in the format (x1, y1, x2, y2) and returning 0 if the inter area is 0.
 
-    Parámetros:
-      box1, box2: Listas o tensores con 4 elementos representando las coordenadas de la caja.
-    Retorna:
-      El valor del IoU, que es el área de intersección dividida por el área de unión.
+    Args:
+        box_gt (np.ndarray): Coordinates of the ground truth bounding box.
+        box_pred (np.ndarray): Coordinates of the predicted bounding box.
+
+    Returns:
+        float: IoU value, which is the area of intersection divided by the area of union.
     """
-    # Calcula las coordenadas de la intersección
-    x1 = max(box1[0], box2[0])
-    y1 = max(box1[1], box2[1])
-    x2 = min(box1[2], box2[2])
-    y2 = min(box1[3], box2[3])
+    #
+    x1_inter = max(box_gt[0], box_pred[0])
+    y1_inter = max(box_gt[1], box_pred[1])
+    x2_inter = min(box_gt[2], box_pred[2])
+    y2_inter = min(box_gt[3], box_pred[3])
 
-    # Calcula el área de intersección
-    inter_width = max(0, x2 - x1)
-    inter_height = max(0, y2 - y1)
-    inter_area = inter_width * inter_height
+    if x2_inter <= x1_inter or y2_inter <= y1_inter:
+        return 0.0
 
-    # Calcula el área de cada caja
-    box1_area = (box1[2] - box1[0]) * (box1[3] - box1[1])
-    box2_area = (box2[2] - box2[0]) * (box2[3] - box2[1])
+    width_inter = x2_inter - x1_inter
+    height_inter = y2_inter - y1_inter
 
-    # Área de unión
-    union_area = box1_area + box2_area - inter_area
+    area_inter = width_inter * height_inter
 
-    return inter_area / union_area if union_area > 0 else 0
+    area_gt = (box_gt[2] - box_gt[0]) * (box_gt[3] - box_gt[1])
+    area_pred = (box_pred[2] - box_pred[0]) * (box_pred[3] - box_pred[1])
+
+    area_union = area_gt + area_pred - area_inter
+
+    iou = area_inter / area_union if area_union > 0 else 0.0
+
+    return iou
 
 
-def load_boxes_from_file(file_path):
+def get_boxes_from_file(source_path: str) -> list:
     """
-    Lee un archivo .txt y devuelve una lista de cajas convertidas al formato (x1, y1, x2, y2).
+    Return a list of boxes from a file, ensuring that the boxes are in the format (x1, y1, x2, y2) and returning 0 if the inter area is 0.
 
-    Se espera que cada línea del archivo tenga el formato:
-      clase, x_center, y_center, width, height
+    Args:
+        source_path (str): Path to the file containing the boxes.
 
-    Parámetros:
-      file_path: Ruta del archivo .txt que contiene las coordenadas.
-    Retorna:
-      Una lista de cajas en formato (x1, y1, x2, y2)
+    Returns:
+        list: List of boxes in the format (x1, y1, x2, y2).
     """
     boxes = []
-    with open(file_path, "r") as f:
+    with open(source_path, "r") as f:
         for line in f:
             line = line.strip()
-            if not line:
-                continue
             parts = line.split()
             try:
                 coords = list(map(float, parts[1:5]))
-                # Se crea un tensor a partir de las coordenadas y se convierte al formato (x1, y1, x2, y2)
                 box = xywh2xyxy(torch.tensor(coords))
-                # Se convierte el tensor a lista para facilitar las operaciones (opcional)
-                boxes.append(box.tolist())
+                boxes.append(box)
             except Exception as e:
-                print(f"Error {e} procesando la línea: {line} en {file_path}")
+                print(f"Error processing line '{line}' in file '{f}': {e}")
     return boxes
 
 
-def evaluate_predictions(gt_dir, pred_dir, iou_threshold=0.5):
+def evalute_predictions(gt_path: str, pred_path: str, iou_threshold: float = 0.5):
     """
-    Evalúa las predicciones en comparación con el ground truth.
+        Get
 
-    Para cada archivo se cuentan:
-      - Verdaderos Positivos (TP): Predicciones que tienen IoU >= umbral y que emparejan una única caja de ground truth.
-      - Falsos Positivos (FP): Predicciones que no encuentran un match o que se emparejan a una caja ya detectada.
-      - Falsos Negativos (FN): Cajas de ground truth que no fueron detectadas por ninguna predicción.
-
-    Parámetros:
-      gt_dir: Directorio de ground truth (archivos .txt)
-      pred_dir: Directorio de predicciones (archivos .txt)
-      iou_threshold: Umbral de IoU para considerar una predicción como acierto.
-    Retorna:
-      Una tupla (TP, FP, FN) y, si se desea, se pueden calcular métricas como recall o precision.
+    Args:
+        gt_path (str): _description_
+        pred_path (str): _description_
+        iou_threshold (float, optional): _description_. Defaults to 0.5.
     """
-    gt_files = detect_files(gt_dir, [".txt"])
-
+    # Counters
     total_gt = 0
+    total_pred = 0
+
+    # True Positives, False Positives, False Negatives
     total_tp = 0
     total_fp = 0
-    total_fn = 0  # Contador de falsos negativos
+    total_fn = 0
+
+    # Sensibility and False Positive Rate
+    sensibility = 0
+    fp_rate = 0
+
+    gt_files = detect_files(gt_path, [".txt"])
 
     for gt_file in gt_files:
+        # Load predicted files
         base_name = os.path.basename(gt_file)
-        pred_file = os.path.join(pred_dir, base_name)
+        pred_file = os.path.join(pred_path, base_name)
 
-        gt_boxes = load_boxes_from_file(gt_file)
-        pred_boxes = (
-            load_boxes_from_file(pred_file) if os.path.exists(pred_file) else []
-        )
+        gt_boxes = get_boxes_from_file(gt_file)
+        pred_boxes = get_boxes_from_file(pred_file) if os.path.exists(pred_file) else []
 
         total_gt += len(gt_boxes)
-        matched_gt = [False] * len(gt_boxes)
+        total_pred += len(pred_boxes)
 
-        # Para cada predicción, se busca su mejor match en las cajas ground truth
-        for pred_box in pred_boxes:
-            best_iou = 0
-            best_gt_idx = -1
-            for idx, gt_box in enumerate(gt_boxes):
-                iou = calculate_iou(pred_box, gt_box)
-                if iou > best_iou:
-                    best_iou = iou
-                    best_gt_idx = idx
-            if best_iou >= iou_threshold and not matched_gt[best_gt_idx]:
+        for gt_box, pred_box in zip(gt_boxes, pred_boxes):
+            iou = calculate_iou(gt_box, pred_box)
+            if iou >= iou_threshold:
                 total_tp += 1
-                matched_gt[best_gt_idx] = True
-            else:
+            if iou == 0:
                 total_fp += 1
 
-        # Las cajas ground truth no emparejadas se cuentan como falsos negativos para la imagen actual
-        fn = matched_gt.count(False)
-        total_fn += fn
+    total_fn = total_gt - total_tp
+    sensibility = total_tp / total_gt if total_gt > 0 else 0
+    fp_rate = total_fp / total_pred if total_pred > 0 else 0
 
-    # Se pueden calcular métricas adicionales, por ejemplo, recall y precision
-    recall = total_tp / total_gt if total_gt > 0 else 0
-    fp_rate = total_fp / total_gt if total_gt > 0 else 0
+    print(f"GT files: {len(gt_files)}")
 
-    print("Total objetos reales (GT):", total_gt)
-    print("Verdaderos Positivos (TP):", total_tp)
-    print("Falsos Positivos (FP):", total_fp)
-    print("Falsos Negativos (FN):", total_fn)
-    print("Recall:", recall)
-    print("Tasa de Falsos Positivos:", fp_rate)
-
-    return total_tp, total_fp, total_fn
-
-
-if __name__ == "__main__":
-    # Define las rutas a los directorios de ground truth y predicciones
-    ground_truth_directory = "data/clean/polypgen/labels/test_single"  # Ajusta según tu estructura de carpetas
-    predictions_directory = (
-        "runs/predict/polypgen_single/labels"  # Ajusta según tu estructura de carpetas
-    )
-
-    evaluate_predictions(
-        ground_truth_directory, predictions_directory, iou_threshold=0.5
-    )
+    print(f"GT boxes: {total_gt}")
+    print(f"Pred boxes: {total_pred}")
+    print(f"True Positives: {total_tp}")
+    print(f"False Positives: {total_fp}")
+    print(f"False Negatives: {total_fn}")
+    print(f"Sensibility: {sensibility * 100:.2f} %")
+    print(f"False Positive Rate: {fp_rate * 100:.2f} %")
