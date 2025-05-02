@@ -15,6 +15,7 @@ from scripts.yolo_utils import (
     export_model,
     make_predicts,
 )
+from scripts.evalute_datasets import evalute_predictions
 import os
 
 # %%
@@ -93,7 +94,7 @@ create_yaml_file(
 total_images = 0
 total_polyps = 0
 # Count images in each folder
-for folder in ["train", "validation", "test_single", "test_sequence"]:
+for folder in ["train", "val", "test"]:
     print(
         f"Images {folder}: {count_files(f'{OUTPUT_IMAGES_FOLDER}/{folder}', ['.jpg', '.png', '.tif'])}"
     )
@@ -144,3 +145,12 @@ results = validate_model(
     name=NAME_DATASET,
     project=f"{BASE_PATH_MODEL}/{VALIDATE_PATH}",
 )
+
+
+# %%
+# Evalute model
+for database in ["polypgen"]:
+    print(f"Evaluating {database} dataset")
+    gt_image = f"data/clean/{database}/labels/test_sequence"
+    pred_image = f"runs/predict/{database}_sequence/labels"
+    evalute_predictions(gt_image, pred_image, iou_threshold=0.95)
