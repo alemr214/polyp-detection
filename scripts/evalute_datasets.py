@@ -91,12 +91,14 @@ def evalute_predictions(gt_path: str, pred_path: str, iou_threshold: float = 0.5
         base_name = os.path.basename(gt_file)
         pred_file = os.path.join(pred_path, base_name)
 
+        # Load ground truth and predicted boxes per files
         gt_boxes = get_boxes_from_file(gt_file)
         pred_boxes = get_boxes_from_file(pred_file) if os.path.exists(pred_file) else []
 
         total_gt += len(gt_boxes)
         total_pred += len(pred_boxes)
 
+        # Calculate True Positives, False Positives with the IoU
         for gt_box, pred_box in zip(gt_boxes, pred_boxes):
             iou = calculate_iou(gt_box, pred_box)
             if iou >= iou_threshold:
@@ -104,8 +106,8 @@ def evalute_predictions(gt_path: str, pred_path: str, iou_threshold: float = 0.5
             if iou == 0:
                 total_fp += 1
 
-    total_fn = total_gt - total_tp
-    sensibility = total_tp / total_gt if total_gt > 0 else 0
+    total_fn = total_pred - total_tp
+    sensibility = total_tp / (total_tp + total_fn) if (total_tp + total_fn) > 0 else 0
     fp_rate = total_fp / total_pred if total_pred > 0 else 0
 
     print(f"GT files: {len(gt_files)}")
