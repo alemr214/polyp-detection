@@ -53,9 +53,18 @@ def count_lines_in_file(source_labels: str) -> int:
     labels = detect_files(source_labels, [".txt"])
     total_lines = 0
     for label in labels:
-        with open(label, "r", encoding="utf-8") as archivo:
-            lines = sum(1 for _ in archivo)
-        total_lines += lines
+        with open(label, "r") as archivo:
+            for line in archivo:
+                line = line.strip()
+                if line:
+                    # Count the number of lines in the file
+                    lines = len(line.split("\n"))
+                    # Add to the total count
+                    if lines > 0:
+                        # Count the number of lines in the file
+                        total_lines += lines
+                    else:
+                        continue
     return total_lines
 
 

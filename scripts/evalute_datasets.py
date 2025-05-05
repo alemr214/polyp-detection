@@ -1,110 +1,121 @@
+from .manage_data import detect_files
+from ultralytics.utils.ops import xywh2xyxy
+import torch
+import numpy as np
 import os
-import glob
 
 
-def read_boxes(file_path):
-    """Lee un archivo de etiquetas YOLO y devuelve una lista de cajas."""
+def calculate_iou(box_gt: np.ndarray, box_pred: np.ndarray) -> float:
+    """
+    Calculate the Intersection over Union (IoU) between two bounding boxes, the ground truth and the predicted box for these case, ensurence that the boxes are in the format (x1, y1, x2, y2) and returning 0 if the inter area is 0.
+
+    Args:
+        box_gt (np.ndarray): Coordinates of the ground truth bounding box.
+        box_pred (np.ndarray): Coordinates of the predicted bounding box.
+
+    Returns:
+        float: IoU value, which is the area of intersection divided by the area of union.
+    """
+    #
+    x1_inter = max(box_gt[0], box_pred[0])
+    y1_inter = max(box_gt[1], box_pred[1])
+    x2_inter = min(box_gt[2], box_pred[2])
+    y2_inter = min(box_gt[3], box_pred[3])
+
+    if x2_inter <= x1_inter or y2_inter <= y1_inter:
+        return 0.0
+
+    width_inter = x2_inter - x1_inter
+    height_inter = y2_inter - y1_inter
+
+    area_inter = width_inter * height_inter
+
+    area_gt = (box_gt[2] - box_gt[0]) * (box_gt[3] - box_gt[1])
+    area_pred = (box_pred[2] - box_pred[0]) * (box_pred[3] - box_pred[1])
+
+    area_union = area_gt + area_pred - area_inter
+
+    iou = area_inter / area_union if area_union > 0 else 0.0
+
+    return iou
+
+
+def get_boxes_from_file(source_path: str) -> list:
+    """
+    Return a list of boxes from a file, ensuring that the boxes are in the format (x1, y1, x2, y2) and returning 0 if the inter area is 0.
+
+    Args:
+        source_path (str): Path to the file containing the boxes.
+
+    Returns:
+        list: List of boxes in the format (x1, y1, x2, y2).
+    """
     boxes = []
-    with open(file_path, "r") as f:
+    with open(source_path, "r") as f:
         for line in f:
-            parts = line.strip().split()
+            line = line.strip()
+            parts = line.split()
             if len(parts) == 5:
-                cls, x, y, w, h = parts
-                boxes.append((float(cls), float(x), float(y), float(w), float(h)))
+                coords = list(map(float, parts[1:5]))
+                box = xywh2xyxy(torch.tensor(coords))
+                boxes.append(box)
     return boxes
 
 
-def convert_to_corners(box):
-    """Convierte (x_center, y_center, width, height) a (x1, y1, x2, y2)."""
-    cls, x_center, y_center, width, height = box
-    x1 = x_center - width / 2
-    y1 = y_center - height / 2
-    x2 = x_center + width / 2
-    y2 = y_center + height / 2
-    return (x1, y1, x2, y2)
+def evalute_predictions(gt_path: str, pred_path: str, iou_threshold: float = 0.5):
+    """
+        Get
 
+    Args:
+        gt_path (str): _description_
+        pred_path (str): _description_
+        iou_threshold (float, optional): _description_. Defaults to 0.5.
+    """
+    # Counters
+    total_gt = 0
+    total_pred = 0
 
-def compute_iou(box1, box2):
-    """Calcula el IoU entre dos cajas."""
-    x1_1, y1_1, x2_1, y2_1 = convert_to_corners(box1)
-    x1_2, y1_2, x2_2, y2_2 = convert_to_corners(box2)
+    # True Positives, False Positives, False Negatives
+    total_tp = 0
+    total_fp = 0
+    total_fn = 0
 
-    xi1 = max(x1_1, x1_2)
-    yi1 = max(y1_1, y1_2)
-    xi2 = min(x2_1, x2_2)
-    yi2 = min(y2_1, y2_2)
+    # Sensibility and False Positive Rate
+    sensibility = 0
+    fp_rate = 0
 
-    inter_width = max(0, xi2 - xi1)
-    inter_height = max(0, yi2 - yi1)
-    inter_area = inter_width * inter_height
+    gt_files = detect_files(gt_path, [".txt"])
 
-    area1 = (x2_1 - x1_1) * (y2_1 - y1_1)
-    area2 = (x2_2 - x1_2) * (y2_2 - y1_2)
-    union_area = area1 + area2 - inter_area
+    for gt_file in gt_files:
+        # Load predicted files
+        base_name = os.path.basename(gt_file)
+        pred_file = os.path.join(pred_path, base_name)
 
-    return inter_area / union_area if union_area > 0 else 0
+        # Load ground truth and predicted boxes per files
+        gt_boxes = get_boxes_from_file(gt_file)
+        pred_boxes = get_boxes_from_file(pred_file) if os.path.exists(pred_file) else []
 
+        total_gt += len(gt_boxes)
+        total_pred += len(pred_boxes)
 
-# Directorios de etiquetas
-gt_dir = "data/clean/cvc_clinic_db/labels/test"
-pred_dir = "runs/predict/cvc_clinic_db/labels"
+        # Calculate True Positives, False Positives with the IoU
+        for gt_box, pred_box in zip(gt_boxes, pred_boxes):
+            iou = calculate_iou(gt_box, pred_box)
+            if iou >= iou_threshold:
+                total_tp += 1
+            if iou == 0:
+                total_fp += 1
 
-gt_files = glob.glob(os.path.join(gt_dir, "*.txt"))
+    total_fn = total_pred - total_tp
+    sensibility = total_tp / (total_tp + total_fn) if (total_tp + total_fn) > 0 else 0
+    fp_rate = total_fp / total_pred if total_pred > 0 else 0
 
-TP_total = 0
-FP_total = 0
-FN_total = 0
-TN_total = 0
+    print(f"GT files: {len(gt_files)}")
 
-iou_threshold = 0.5
-
-for gt_file in gt_files:
-    filename = os.path.basename(gt_file)
-    pred_file = os.path.join(pred_dir, filename)
-
-    gt_boxes = read_boxes(gt_file)
-    pred_boxes = read_boxes(pred_file) if os.path.exists(pred_file) else []
-
-    matched_pred_indices = set()
-    TP = 0
-    FN = 0
-
-    for gt in gt_boxes:
-        best_iou = 0
-        best_pred_idx = -1
-        for i, pred in enumerate(pred_boxes):
-            if i in matched_pred_indices:
-                continue
-            iou = compute_iou(gt, pred)
-            if iou > best_iou:
-                best_iou = iou
-                best_pred_idx = i
-        if best_iou >= iou_threshold:
-            TP += 1
-            matched_pred_indices.add(best_pred_idx)
-        else:
-            FN += 1
-
-    FP = len(pred_boxes) - len(matched_pred_indices)
-
-    # Cálculo de TN (cuando no hay detecciones en imágenes sin objetos)
-    if len(gt_boxes) == 0 and len(pred_boxes) == 0:
-        TN = 1
-    else:
-        TN = 0  # En este caso no podemos calcular TN con precisión sin segmentación adicional
-
-    TP_total += TP
-    FN_total += FN
-    FP_total += FP
-    TN_total += TN
-
-sensitivity = TP_total / (TP_total + FN_total) if (TP_total + FN_total) > 0 else 0
-specificity = TN_total / (TN_total + FP_total) if (TN_total + FP_total) > 0 else 0
-
-print("Resultados:")
-print("TP:", TP_total)
-print("FN:", FN_total)
-print("FP:", FP_total)
-print("TN:", TN_total)
-print("Sensibilidad (Recall):", sensitivity)
-print("Especificidad:", specificity)
+    print(f"GT boxes: {total_gt}")
+    print(f"Pred boxes: {total_pred}")
+    print(f"True Positives: {total_tp}")
+    print(f"False Positives: {total_fp}")
+    print(f"False Negatives: {total_fn}")
+    print(f"Sensibility: {sensibility * 100:.2f} %")
+    print(f"False Positive Rate: {fp_rate * 100:.2f} %")
