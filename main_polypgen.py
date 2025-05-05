@@ -10,8 +10,6 @@ from scripts.process_images import (
     yolo_format,
 )
 from scripts.manage_data import (
-    count_lines_in_file,
-    count_files,
     create_dir,
 )
 # from google.colab.patches import cv2_imshow
@@ -28,47 +26,11 @@ def detect_imgs(infolder, ext=".tif"):
     return np.sort(flist)
 
 
-# def create_dir(path):
-#     """Create a directory."""
-#     try:
-#         if not os.path.exists(path):
-#             os.makedirs(path)
-#     except OSError:
-#         print(f"Error: creating directory with name {path}")
-
-
 # writing bbox
 def save_bbox(txt_path, line):
     txt_path = txt_path + ".txt"
     with open(txt_path, "w") as myfile:
         myfile.write(line + "\n")  # append line
-
-
-# def valRect(coord):
-#     xmin = np.min(coord[:, 0, 0]) + 1
-#     ymin = np.min(coord[:, 0, 1]) + 1
-#     xmax = np.max(coord[:, 0, 0]) + 1
-#     ymax = np.max(coord[:, 0, 1]) + 1
-#     return [xmin, ymin, xmax, ymax]
-
-
-# def yolo_format(class_index, coord, width, height):
-#     [xmin, ymin, xmax, ymax] = valRect(coord)
-#     x_center = (xmin + xmax) / float(2.0 * width)
-#     y_center = (ymin + ymax) / float(2.0 * height)
-#     x_width = float(abs(xmax - xmin)) / width
-#     y_height = float(abs(ymax - ymin)) / height
-#     return (
-#         str(class_index)
-#         + " "
-#         + str(x_center)
-#         + " "
-#         + str(y_center)
-#         + " "
-#         + str(x_width)
-#         + " "
-#         + str(y_height)
-#     )
 
 
 # Global variables
@@ -132,16 +94,13 @@ def FindImages(
         allfileList = detect_imgs(imageDir, ext_file)
         maskDir = path_data + center + "/masks_" + centerId
         print("Imágenes que serán procesadas: " + str(len(allfileList)))
-        # print(maskDir)
         # Recorre todas las imágenes procesadas en el centro actual
         for ii, imageFile in enumerate(allfileList[:]):
             "listimage files and find the type and modality of polyp"
             fileNameOnly = imageFile.split(os.sep)[-1].split(".")[0]
-            # print(fileNameOnly)
             image = cv.imread(imageFile)
             maskFile = maskDir + "/" + fileNameOnly + "_mask" + ext_file
             maskFile = maskFile.replace("]", "")
-            # print(maskFile)
             "distinguish sizes of polyps and quantify numbers for each case"
             maskCordinates = detect_object(maskFile)
             maskCordinates = normalize_coordiantes(maskCordinates)
@@ -265,29 +224,17 @@ print(
 )
 
 # %%
-
 for ii, imageFile in enumerate(validation_data_tbl[:]):
     "listimage files and find the type and modality of polyp"
     fileNameOnly = imageFile.split(os.sep)[-1].split(".")[0]
     labelFile = dirLabelsTrain + "/" + fileNameOnly + ".txt"
-    # print(labelFile)
     maskFile = dirMasksTrain + "/" + fileNameOnly + "_mask" + _EXT_FILE
-    # print(maskFile)
     # move image
-    # cmd_ImgFile = 'mv ' + imageFile+' '+dirImagesVal+'/'
-    # os.popen(cmd_ImgFile)
     shutil.move(imageFile, dirImagesVal)
-    # print(cmd_ImgFile)
     # movel label
-    # cmd_LabelFile = 'mv ' + labelFile+' '+dirLabelsVal
-    # os.popen(cmd_LabelFile)
     shutil.move(labelFile, dirLabelsVal)
-    # print(cmd_LabelFile)
     # move mask
-    # cmd_MaskFile = 'mv ' + maskFile+' '+dirMasksVal+'/'
-    # os.popen(cmd_MaskFile)
     shutil.move(maskFile, dirMasksVal)
-    # print(cmd_MaskFile)
     print(str(ii) + "- archivo: " + fileNameOnly + " movido")
 len(validation_data_tbl)
 
