@@ -101,7 +101,6 @@ def export_model(model_path: str, format: str) -> None:
     best_model = get_best_model(model_path)
     best_model.export(
         format=format,
-        opset=12,
         device=get_device(),
     )
 

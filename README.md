@@ -1,82 +1,84 @@
-# Polyp Detector
+# Polyp-Detection
 
-YOLOv11 pre-trained model to detect colo-rectal polyps using public datasets.
+A deep learning project for automatic detection and localization of polyps in endoscopic images. This repository includes scripts necessary to work for data preparation, model training, inference scripts, and evaluation metrics for robust performance analysis.
+
+## Table of Contents
+
+* [Features](#features)
+* [Getting Started](#getting-started)
+
+  * [Prerequisites](#prerequisites)
+  * [Installation](#installation)
+* [Project Structure](#project-structure)
+* [Contributing](#contributing)
+* [License](#license)
+
+## Features
+
+* **Data preparation**: Tools to preprocess and augment endoscopic images.
+* **Model architectures**: Implementations of state-of-the-art object detection models (e.g., YOLOv11).
+* **Training scripts**: Easy-to-use Python scripts to train models on custom datasets.
+* **Inference pipeline**: Run inference on single images, directories, or video streams.
+* **Evaluation metrics**: Compute precision, recall, F1-score, and mAP for model performance.
 
 ## Getting Started
 
-All code below is written in Python 3.12.8 version, you'll find all libraries required in the requirements.txt file, the model pre-trained is the CNN model YOLOv11.
-
-### Folder structure
-
-    .
-    ├── data/                                           # Base path to all datasets
-    │   └── clean/                                      # Clean path for cleaned data
-    │       ├── cvc_clinic_db/                          # Name of datasets
-    │       │   ├── bbox                                # Images with its bounding boxes drawn with the binary mask image
-    │       │   ├── images/                             # Path for images and split in YOLO format
-    │       │   │   ├── test/                           
-    │       │   │   ├── train/
-    │       │   │   └── val/
-    │       │   ├── labels                              # Path for labels and split in YOLO format
-    │       │   └── masks                               # Binary masks
-    │       ├── cvc_colon_db/
-    │       │   └── ...
-    │       ├── etis_laribpolypdb/
-    │       │   └── ...
-    │       ├── kvasir_seg/
-    │       │   └── ...
-    │       ├── sessile_main_kvasir_seg/
-    │       │   └── ...
-    │       └── predict_images/                         # Images for predict feature functions
-    ├── scripts/
-    │   ├── manage_data.py                              # Script for manage images and utilities
-    │   └── process_images.py                           # Process images and annotate functions
-    ├── data_preparation.py                             # Base script to prepare images and other files
-    ├── train_model.py                                  # Ultralytics functions to use and train YOLO model
-    ├── README.md                                       
-    ├── LICENSE
-    └── requirements.txt
+Follow these instructions to set up a local development environment and run experiments.
 
 ### Prerequisites
 
-Requirements for the software and other tools to build.
+* Python 3.12
+* PyTorch 2.7
+* CUDA 10.2 or higher (for GPU acceleration)
+* Git
 
-- [YOLOv11](https://docs.ultralytics.com/models/yolo11/)
+### Installation
 
-#### Libraries
+1. **Clone the repository**:
 
-Found in the [requirements.txt](requirements.txt) file.
+   ```bash
+   git clone https://github.com/alemr214/polyp-detection.git
+   cd polyp-detection
+   ```
 
-#### Datasets
+2. **Create and activate a virtual environment**:
 
-- [PolypGen](https://www.synapse.org/#!Synapse:syn45200214)
-- [CVC-Clinic DB](https://www.kaggle.com/datasets/balraj98/cvcclinicdb/data)
-- [CVC-Colon DB](https://www.kaggle.com/datasets/longvil/cvc-colondb)
-- [ETIS-LaribPolypDB](https://www.kaggle.com/datasets/nguyenvoquocduong/etis-laribpolypdb)
-- [Kvasir-SEG](https://www.kaggle.com/datasets/debeshjha1/kvasirseg)
-- [Kvasir](https://www.kaggle.com/datasets/meetnagadia/kvasir-dataset)
-- [Kvasir-Sessile](https://www.kaggle.com/datasets/debeshjha1/kvasirsessile)
-- [Hyper Kvasir](https://www.kaggle.com/datasets/kelkalot/the-hyper-kvasir-dataset/data)
+   ```bash
+   python -m venv venv
+   source venv/bin/activate   # On Windows use `venv\\Scripts\\activate`
+   ```
 
-### Installing
+3. **Install required packages**:
 
-To work with the libraries used in the project, you should run the following:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-> Recommendation: create a virtual environment to work, you can follow the guide in the link: [Guide venv](https://docs.python.org/3/library/venv.html)
+## Project Structure
 
-Upgrade pip before install libraries
+```
+polyp-detection/          # Root directory
+├── configs/              # Configuration files (YAML)
+├── data/                 # Dataset directory
+├── runs/                 # Training, exporting and validation outputs
+├── scripts/              # Python functions
+├── main_polypgen.py      # Polypgen working 
+├── main.py               # Main file to run the scripts
+├── requirements.txt      # Python dependencies
+└── README.md             # Project overview
+```
 
-    pip install --upgrade pip
+## Contributing
 
-Install the libraries used on
+Contributions are welcome! Please adhere to the following:
 
-    pip install -r requirements.txt
+1. Fork the repository and create a feature branch: `git checkout -b feature-name`
+2. Commit your changes: \`git commit -m "Add some feature"
+3. Push to your fork: `git push origin feature-name`
+4. Open a pull request on GitHub and describe your changes.
 
-## Authors
-
-- **Alemr214** - *Main Developer* -
-    [alemr214](https://github.com/alemr214)
+Please follow the [Contributor Covenant](https://www.contributor-covenant.org/) code of conduct.
 
 ## License
 
-This project is licensed under the [Apache License](LICENSE)
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

@@ -1,4 +1,5 @@
 # %%
+# Exporting funcitons to work
 from scripts.process_images import annotate_images, draw_bounding_boxes_on_images
 from scripts.manage_data import (
     copy_images,
@@ -22,20 +23,11 @@ import os
 BASE_PATH = os.getcwd()
 PATH_RAW = "data/raw"
 PATH_CLEAN = "data/clean"
-NAME_DATASET = "polypgen"
 BASE_PATH_YAML = "configs"
 BASE_PATH_MODEL = "runs"
 TRAIN_PATH = "train"
 PREDICT_PATH = "predict"
 VALIDATE_PATH = "validate"
-
-# Designated paths of data to process raw data
-IMAGES_FOLDER = f"{PATH_RAW}/{NAME_DATASET}/images"
-MASKS_FOLDER = f"{PATH_RAW}/{NAME_DATASET}/masks"
-
-# Output paths
-OUTPUT_IMAGES_FOLDER = f"{PATH_CLEAN}/{NAME_DATASET}/images"
-OUTPUT_MASKS_FOLDER = f"{PATH_CLEAN}/{NAME_DATASET}/masks"
 
 # Class index to save the annotations
 CLASS_INDEX = 0
@@ -44,9 +36,23 @@ CLASS_INDEX = 0
 PREFIX_IMAGE = "image"
 
 # %%
-# Copy images and masks to the output folder
-copy_images(IMAGES_FOLDER, OUTPUT_IMAGES_FOLDER)
-copy_images(MASKS_FOLDER, OUTPUT_MASKS_FOLDER)
+for dataset in [
+    "cvc_clinic_db",
+    "cvc_colon_db",
+    "etis_laribpolypdb",
+    "kvasir_seg",
+    "sessile_main_kvasir_seg",
+]:
+    # Designated paths of data to process raw data
+    IMAGES_FOLDER = f"{PATH_RAW}/{dataset}/images"
+    MASKS_FOLDER = f"{PATH_RAW}/{dataset}/masks"
+    # Output paths
+    OUTPUT_IMAGES_FOLDER = f"{PATH_CLEAN}/{dataset}/images"
+    OUTPUT_MASKS_FOLDER = f"{PATH_CLEAN}/{dataset}/masks"
+
+    # Copy images and masks to the output folder
+    copy_images(IMAGES_FOLDER, OUTPUT_IMAGES_FOLDER)
+    copy_images(MASKS_FOLDER, OUTPUT_MASKS_FOLDER)
 
 # %%
 for dataset in [
@@ -136,8 +142,8 @@ for dataset in [
     create_yaml_file(
         f"{BASE_PATH}/{PATH_CLEAN}/{dataset}",
         "images/train",
-        "images/validation",
-        "images/test_single",
+        "images/val",
+        "images/test",
         1,
         ["polyp"],
         f"{BASE_PATH_YAML}/{dataset}/",
@@ -145,21 +151,15 @@ for dataset in [
 
 
 # %%
-# Counters
-total_images = 0
-total_polyps = 0
-
-for dataset in [
-    "cvc_clinic_db",
-    "cvc_colon_db",
-    "etis_laribpolypdb",
-    "kvasir_seg",
-    "sessile_main_kvasir_seg",
-]:
+for dataset in ["polypgen"]:
     # Output paths
     OUTPUT_IMAGES_FOLDER = f"{PATH_CLEAN}/{dataset}/images"
     OUTPUT_LABELS_FOLDER = f"{PATH_CLEAN}/{dataset}/labels"
+    # Counters
+    total_images = 0
+    total_polyps = 0
 
+    print(f"Dataset: {dataset.upper()}")
     # Count images in each folder
     for folder in ["train", "validation", "test_single", "test_sequence"]:
         print(
@@ -183,43 +183,53 @@ for dataset in [
     "etis_laribpolypdb",
     "kvasir_seg",
     "sessile_main_kvasir_seg",
+    "polypgen_single",
+    "polypgen_sequence",
 ]:
     # Train model
     train_model(
         f"{BASE_PATH_MODEL}/{TRAIN_PATH}/{dataset}/yolo11n.pt",
         f"{BASE_PATH_YAML}/{dataset}/dataset.yaml",
-        epoches=5,
+        epoches=1000,
         image_size=640,
-        batch_size=-1,
-        save_period=1,
-        name=NAME_DATASET,
+        batch_size=16,
+        save_period=100,
+        name=f"{dataset}",
         project=f"{BASE_PATH_MODEL}/{TRAIN_PATH}",
     )
 
+# %%
 for dataset in [
     "cvc_clinic_db",
     "cvc_colon_db",
     "etis_laribpolypdb",
     "kvasir_seg",
     "sessile_main_kvasir_seg",
+    "polypgen_single",
+    "polypgen_sequence",
 ]:
+    # Export model
     export_model(f"{BASE_PATH_MODEL}/{TRAIN_PATH}/{dataset}", "onnx")
-    export_model(f"{BASE_PATH_MODEL}/{TRAIN_PATH}/{dataset}", "engine")
-    export_model(f"{BASE_PATH_MODEL}/{TRAIN_PATH}/{dataset}", "tflite")
     export_model(f"{BASE_PATH_MODEL}/{TRAIN_PATH}/{dataset}", "coreml")
 
 # %%
-# Predict model
 for dataset in [
     "cvc_clinic_db",
     "cvc_colon_db",
     "etis_laribpolypdb",
     "kvasir_seg",
     "sessile_main_kvasir_seg",
+    "polypgen_single",
+    "polypgen_sequence",
 ]:
+    # Predict model
     make_predicts(
         f"{BASE_PATH_MODEL}/{TRAIN_PATH}/{dataset}",
-        f"{PATH_CLEAN}/{dataset}/images/test",
+        f"{PATH_CLEAN}/{dataset}/images/test_single"
+        if dataset == "polypgen_single"
+        else f"{PATH_CLEAN}/{dataset}/images/test_sequence"
+        if dataset == "polypgen_sequence"
+        else f"{PATH_CLEAN}/{dataset}/images/test",
         name=f"{dataset}",
         project=f"{BASE_PATH_MODEL}/{PREDICT_PATH}",
     )
@@ -232,26 +242,38 @@ for dataset in [
     "etis_laribpolypdb",
     "kvasir_seg",
     "sessile_main_kvasir_seg",
+    "polypgen_single",
+    "polypgen_sequence",
 ]:
     # Validate model
     results = validate_model(
         f"{BASE_PATH_MODEL}/{TRAIN_PATH}/{dataset}",
         f"{BASE_PATH_YAML}/{dataset}/dataset.yaml",
-        name={dataset},
+        name=f"{dataset}",
         project=f"{BASE_PATH_MODEL}/{VALIDATE_PATH}",
     )
 
 
 # %%
-# Evalute model
-for database in [
+for dataset in [
     "cvc_clinic_db",
     "cvc_colon_db",
     "etis_laribpolypdb",
     "kvasir_seg",
     "sessile_main_kvasir_seg",
+    "polypgen_single",
+    "polypgen_sequence",
 ]:
-    print(f"Evaluating {database} dataset")
-    gt_image = f"data/clean/{database}/labels/test"
-    pred_image = f"runs/predict/{database}/labels"
+    # Evalute model
+    print(f"Evaluating {dataset} dataset")
+    gt_image = (
+        f"data/clean/{dataset}/labels/test_single"
+        if dataset == "polypgen_single"
+        else f"data/clean/{dataset}/labels/test_sequence"
+        if dataset == "polypgen_sequence"
+        else f"data/clean/{dataset}/labels/test"
+    )
+    pred_image = f"runs/predict/{dataset}/labels"
     evalute_predictions(gt_image, pred_image, iou_threshold=0.25)
+
+# %%
