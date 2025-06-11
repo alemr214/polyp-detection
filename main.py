@@ -11,7 +11,6 @@ from scripts.manage_data import (
 )
 from scripts.yolo_utils import (
     train_model,
-    validate_model,
     export_model,
     make_predicts,
 )
