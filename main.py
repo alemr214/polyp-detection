@@ -133,6 +133,8 @@ for dataset in [
     "etis_laribpolypdb",
     "kvasir_seg",
     "sessile_main_kvasir_seg",
+    "polypgen_single",
+    "polypgen_sequence",
 ]:
     # Output paths
     OUTPUT_IMAGES_FOLDER = f"{PATH_CLEAN}/{dataset}/images"
@@ -151,7 +153,15 @@ for dataset in [
 
 
 # %%
-for dataset in ["polypgen"]:
+for dataset in [
+    "cvc_clinic_db",
+    "cvc_colon_db",
+    "etis_laribpolypdb",
+    "kvasir_seg",
+    "sessile_main_kvasir_seg",
+    "polypgen_single",
+    "polypgen_sequence",
+]:
     # Output paths
     OUTPUT_IMAGES_FOLDER = f"{PATH_CLEAN}/{dataset}/images"
     OUTPUT_LABELS_FOLDER = f"{PATH_CLEAN}/{dataset}/labels"
@@ -161,7 +171,7 @@ for dataset in ["polypgen"]:
 
     print(f"Dataset: {dataset.upper()}")
     # Count images in each folder
-    for folder in ["train", "validation", "test_single", "test_sequence"]:
+    for folder in ["train", "val", "test"]:
         print(
             f"Images {folder}: {count_files(f'{OUTPUT_IMAGES_FOLDER}/{folder}', ['.jpg', '.png', '.tif'])}"
         )
@@ -192,7 +202,7 @@ for dataset in [
         f"{BASE_PATH_YAML}/{dataset}/dataset.yaml",
         epoches=1000,
         image_size=640,
-        batch_size=16,
+        batch_size=4,
         save_period=100,
         name=f"{dataset}",
         project=f"{BASE_PATH_MODEL}/{TRAIN_PATH}",
@@ -211,6 +221,8 @@ for dataset in [
     # Export model
     export_model(f"{BASE_PATH_MODEL}/{TRAIN_PATH}/{dataset}", "onnx")
     export_model(f"{BASE_PATH_MODEL}/{TRAIN_PATH}/{dataset}", "coreml")
+    export_model(f"{BASE_PATH_MODEL}/{TRAIN_PATH}/{dataset}", "ncnn")
+
 
 # %%
 for dataset in [
@@ -275,5 +287,3 @@ for dataset in [
     )
     pred_image = f"runs/predict/{dataset}/labels"
     evalute_predictions(gt_image, pred_image, iou_threshold=0.25)
-
-# %%
