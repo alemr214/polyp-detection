@@ -237,11 +237,7 @@ for dataset in [
     # Predict model
     make_predicts(
         f"{BASE_PATH_MODEL}/{TRAIN_PATH}/{dataset}",
-        f"{PATH_CLEAN}/{dataset}/images/test_single"
-        if dataset == "polypgen_single"
-        else f"{PATH_CLEAN}/{dataset}/images/test_sequence"
-        if dataset == "polypgen_sequence"
-        else f"{PATH_CLEAN}/{dataset}/images/test",
+        f"{PATH_CLEAN}/{dataset}/images/test",
         name=f"{dataset}",
         project=f"{BASE_PATH_MODEL}/{PREDICT_PATH}",
     )
@@ -259,12 +255,6 @@ for dataset in [
 ]:
     # Evalute model
     print(f"Evaluating {dataset} dataset")
-    gt_image = (
-        f"data/clean/{dataset}/labels/test_single"
-        if dataset == "polypgen_single"
-        else f"data/clean/{dataset}/labels/test_sequence"
-        if dataset == "polypgen_sequence"
-        else f"data/clean/{dataset}/labels/test"
-    )
+    gt_image = f"data/clean/{dataset}/labels/test"
     pred_image = f"runs/predict/{dataset}/labels"
     evalute_predictions(gt_image, pred_image, iou_threshold=0.25)
