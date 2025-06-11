@@ -257,25 +257,6 @@ for dataset in [
     "polypgen_single",
     "polypgen_sequence",
 ]:
-    # Validate model
-    results = validate_model(
-        f"{BASE_PATH_MODEL}/{TRAIN_PATH}/{dataset}",
-        f"{BASE_PATH_YAML}/{dataset}/dataset.yaml",
-        name=f"{dataset}",
-        project=f"{BASE_PATH_MODEL}/{VALIDATE_PATH}",
-    )
-
-
-# %%
-for dataset in [
-    "cvc_clinic_db",
-    "cvc_colon_db",
-    "etis_laribpolypdb",
-    "kvasir_seg",
-    "sessile_main_kvasir_seg",
-    "polypgen_single",
-    "polypgen_sequence",
-]:
     # Evalute model
     print(f"Evaluating {dataset} dataset")
     gt_image = (
