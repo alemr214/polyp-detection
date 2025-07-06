@@ -5,12 +5,11 @@ A deep learning project for automatic detection and localization of polyps in en
 ## Table of Contents
 
 * [Features](#features)
+* [Datasets used](#datasets-used)
 * [Getting Started](#getting-started)
-
   * [Prerequisites](#prerequisites)
   * [Installation](#installation)
 * [Project Structure](#project-structure)
-* [Contributing](#contributing)
 * [License](#license)
 
 ## Features
@@ -20,6 +19,15 @@ A deep learning project for automatic detection and localization of polyps in en
 * **Training scripts**: Easy-to-use Python scripts to train models on custom datasets.
 * **Inference pipeline**: Run inference on single images, directories, or video streams.
 * **Evaluation metrics**: Compute precision, recall, F1-score, and mAP for model performance.
+
+## Datasets used
+
+* [PolypGen](https://www.synapse.org/#!Synapse:syn45200214)
+* [CVC-Clinic DB](https://www.kaggle.com/datasets/balraj98/cvcclinicdb/data)
+* [CVC-Colon DB](https://www.kaggle.com/datasets/longvil/cvc-colondb)
+* [ETIS-LaribPolypDB](https://www.kaggle.com/datasets/nguyenvoquocduong/etis-laribpolypdb)
+* [Kvasir-SEG](https://www.kaggle.com/datasets/debeshjha1/kvasirseg)
+* [Kvasir-Sessile](https://www.kaggle.com/datasets/debeshjha1/kvasirsessile)
 
 ## Getting Started
 
@@ -57,27 +65,59 @@ Follow these instructions to set up a local development environment and run expe
 ## Project Structure
 
 ```
-polyp-detection/          # Root directory
-├── configs/              # Configuration files (YAML)
-├── data/                 # Dataset directory
-├── runs/                 # Training, exporting and validation outputs
-├── scripts/              # Python functions
-├── main_polypgen.py      # Polypgen working 
-├── main.py               # Main file to run the scripts
-├── requirements.txt      # Python dependencies
-└── README.md             # Project overview
+polyp-detection/                    #Root
+├── configs/                        # Configuration files (YAML)
+│   ├── dataset_name/
+│   │   └── dataset.yaml
+│   └── ...
+├── data/                           # Dataset directory
+│   ├── clean/                      # Clean images processed with process_images.py
+│   │   ├── dataset_name/
+│   │   │   ├── bbox/               # Bounding Boxes
+│   │   │   │   ├── image.png
+│   │   │   │   └── ...
+│   │   │   ├── images/             # Split images
+│   │   │   │   ├── test/
+│   │   │   │   │   ├── image.png
+│   │   │   │   │   └── ...
+│   │   │   │   ├── train/
+│   │   │   │   │   ├── image.png
+│   │   │   │   │   └── ...
+│   │   │   │   └── val/
+│   │   │   │       ├── image.png
+│   │   │   │       └── ...
+│   │   │   ├── labels/             # Split labels
+│   │   │   │   ├── test/
+│   │   │   │   │   ├── image.txt
+│   │   │   │   │   └── ...
+│   │   │   │   ├── train/
+│   │   │   │   │   ├── image.txt
+│   │   │   │   │   └── ...
+│   │   │   │   └── val/
+│   │   │   │       ├── image.txt
+│   │   │   │       └── ...
+│   │   │   └── masks/              # Binary masks
+│   │   │       ├── image.png
+│   │   │       └── ...
+│   │   └── ...
+│   └── raw/
+│       └── dataset_name/
+│           └── ...
+├── runs/                           # Training, exporting and predictions
+│   ├── predict/
+│   │   └── ...
+│   └── train/
+│       └── ...
+├── scripts/                        # Python functions
+│   ├── evaluate_datasets.py
+│   ├── manage_data.py
+│   ├── process_images.py
+│   └── yolo_utils.py
+├── main.py                         # Main file to run the scripts
+├── main_polypgen.py                # Script to process polypgen dataset
+├── requirements.txt                # Python dependencies
+└── endomind_advanced.pt            # Endomind model
 ```
-
-## Contributing
-
-Contributions are welcome! Please adhere to the following:
-
-1. Fork the repository and create a feature branch: `git checkout -b feature-name`
-2. Commit your changes: \`git commit -m "Add some feature"
-3. Push to your fork: `git push origin feature-name`
-4. Open a pull request on GitHub and describe your changes.
-
-Please follow the [Contributor Covenant](https://www.contributor-covenant.org/) code of conduct.
 
 ## License
 
