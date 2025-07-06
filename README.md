@@ -86,7 +86,7 @@ polyp-detection/                    #Root
 │   │   │   │   └── val/
 │   │   │   │       ├── image.png
 │   │   │   │       └── ...
-│   │   │   ├── labels/             # Splited labels
+│   │   │   ├── labels/             # Split labels
 │   │   │   │   ├── test/
 │   │   │   │   │   ├── image.txt
 │   │   │   │   │   └── ...
