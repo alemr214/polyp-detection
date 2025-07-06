@@ -197,14 +197,14 @@ for dataset in [
 ]:
     # Train model
     train_model(
-        f"{BASE_PATH_MODEL}/{TRAIN_PATH}/{dataset}/yolo11n.pt",
+        f"{BASE_PATH_MODEL}/{TRAIN_PATH}_5/{dataset}/yolo11n.pt",
         f"{BASE_PATH_YAML}/{dataset}/dataset.yaml",
         epoches=1000,
         image_size=640,
         batch_size=4,
         save_period=100,
         name=f"{dataset}",
-        project=f"{BASE_PATH_MODEL}/{TRAIN_PATH}",
+        project=f"{BASE_PATH_MODEL}/{TRAIN_PATH}_5",
     )
 
 # %%
@@ -235,10 +235,10 @@ for dataset in [
 ]:
     # Predict model
     make_predicts(
-        f"{BASE_PATH_MODEL}/{TRAIN_PATH}/{dataset}",
+        f"{BASE_PATH_MODEL}/{TRAIN_PATH}_5/{dataset}",
         f"{PATH_CLEAN}/{dataset}/images/test",
         name=f"{dataset}",
-        project=f"{BASE_PATH_MODEL}/{PREDICT_PATH}",
+        project=f"{BASE_PATH_MODEL}/{PREDICT_PATH}_5",
     )
 
 
@@ -255,5 +255,5 @@ for dataset in [
     # Evalute model
     print(f"Evaluating {dataset} dataset")
     gt_image = f"data/clean/{dataset}/labels/test"
-    pred_image = f"runs/predict/{dataset}/labels"
-    evalute_predictions(gt_image, pred_image, iou_threshold=0.25)
+    pred_image = f"runs/predict_5/{dataset}/labels"
+    evalute_predictions(gt_image, pred_image, iou_threshold=0.75)
