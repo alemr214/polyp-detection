@@ -76,7 +76,7 @@ polyp-detection/                    #Root
 │   │   │   ├── bbox/               # Bounding Boxes
 │   │   │   │   ├── image.png
 │   │   │   │   └── ...
-│   │   │   ├── images/             # Splited images
+│   │   │   ├── images/             # Split images
 │   │   │   │   ├── test/
 │   │   │   │   │   ├── image.png
 │   │   │   │   │   └── ...
